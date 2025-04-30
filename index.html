@@ -382,103 +382,19 @@
   }
 }
 </style>
+<div class="kling-container">
+  <!-- [Previous HTML remains exactly the same until the script section] -->
+</div>
+
+<style>
+  /* [Previous CSS remains exactly the same] */
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // DOM elements
-  const uploadBox = document.getElementById('uploadBox');
-  const previewBox = document.getElementById('previewBox');
-  const imageUpload = document.getElementById('imageUpload');
-  const uploadBtn = document.getElementById('uploadBtn');
-  const changeImageBtn = document.getElementById('changeImageBtn');
-  const imagePreview = document.getElementById('imagePreview');
-  const videoLength = document.getElementById('videoLength');
-  const lengthValue = document.getElementById('lengthValue');
-  const generateBtn = document.getElementById('generateBtn');
-  const resultsSection = document.getElementById('resultsSection');
-  const videoGrid = document.getElementById('videoGrid');
-  const modeBtns = document.querySelectorAll('.kling-mode-btn');
+  // [Previous DOM elements and event listeners remain the same until generateBtn click handler]
   
-  // Mode switching
-  modeBtns.forEach(btn => {
-    btn.addEventListener('click', function() {
-      modeBtns.forEach(b => b.classList.remove('active'));
-      this.classList.add('active');
-      
-      if (this.dataset.mode === 'text-to-video') {
-        document.querySelector('.kling-main').classList.add('text-to-video-mode');
-      } else {
-        document.querySelector('.kling-main').classList.remove('text-to-video-mode');
-      }
-    });
-  });
-  
-  // Update length value display
-  videoLength.addEventListener('input', function() {
-    lengthValue.textContent = this.value + 's';
-  });
-  
-  // Handle image upload
-  uploadBtn.addEventListener('click', function() {
-    imageUpload.click();
-  });
-  
-  changeImageBtn.addEventListener('click', function() {
-    imageUpload.click();
-  });
-  
-  imageUpload.addEventListener('change', function(e) {
-    if (e.target.files.length > 0) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      
-      reader.onload = function(event) {
-        imagePreview.src = event.target.result;
-        uploadBox.style.display = 'none';
-        previewBox.style.display = 'block';
-      };
-      
-      reader.readAsDataURL(file);
-    }
-  });
-  
-  // Drag and drop functionality
-  uploadBox.addEventListener('dragover', function(e) {
-    e.preventDefault();
-    this.style.borderColor = '#6d28d9';
-    this.style.background = '#f5f0ff';
-  });
-  
-  uploadBox.addEventListener('dragleave', function(e) {
-    e.preventDefault();
-    this.style.borderColor = '#ccc';
-    this.style.background = '#f9f9f9';
-  });
-  
-  uploadBox.addEventListener('drop', function(e) {
-    e.preventDefault();
-    this.style.borderColor = '#ccc';
-    this.style.background = '#f9f9f9';
-    
-    if (e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0];
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        
-        reader.onload = function(event) {
-          imagePreview.src = event.target.result;
-          uploadBox.style.display = 'none';
-          previewBox.style.display = 'block';
-        };
-        
-        reader.readAsDataURL(file);
-      } else {
-        alert('Please upload an image file.');
-      }
-    }
-  });
-  
-  // Generate video function
+  // Generate video function - THIS IS THE UPDATED VERSION
   generateBtn.addEventListener('click', function() {
     const mode = document.querySelector('.kling-mode-btn.active').dataset.mode;
     const videoStyle = document.getElementById('videoStyle').value;
@@ -499,50 +415,170 @@ document.addEventListener('DOMContentLoaded', function() {
     this.disabled = true;
     this.textContent = 'Generating...';
     
-    // In a real implementation, you would call your API here
-    // For demo purposes, we'll simulate API call with setTimeout
-    setTimeout(() => {
-      // Simulate successful generation
-      this.disabled = false;
-      this.textContent = 'Generate Video';
+    // Create a canvas to generate video frames from the image
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.src = imagePreview.src;
+    
+    img.onload = function() {
+      canvas.width = img.width;
+      canvas.height = img.height;
       
-      // Show results section
-      resultsSection.style.display = 'block';
-      
-      // Clear previous results
-      videoGrid.innerHTML = '';
-      
-      // Add sample generated videos (in a real app, these would come from your API)
-      for (let i = 0; i < 3; i++) {
-        const videoItem = document.createElement('div');
-        videoItem.className = 'kling-video-item';
+      // In a real implementation, you would call your API here
+      // For demo purposes, we'll simulate video generation
+      setTimeout(() => {
+        generateBtn.disabled = false;
+        generateBtn.textContent = 'Generate Video';
         
-        // For demo, we'll use placeholder video
-        // In a real implementation, you would use the actual generated video URL
-        videoItem.innerHTML = `
-          <video controls>
-            <source src="https://sample-videos.com/video123/mp4/720/sample_video_720mp4_1mb.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-          </video>
-          <div class="kling-video-actions">
-            <span>Version ${i+1}</span>
-            <button class="kling-download-btn">Download</button>
-          </div>
-        `;
+        // Show results section
+        resultsSection.style.display = 'block';
+        videoGrid.innerHTML = '';
         
-        videoGrid.appendChild(videoItem);
-      }
-      
-      // Scroll to results
-      resultsSection.scrollIntoView({ behavior: 'smooth' });
-    }, 3000);
+        // Generate 3 sample videos (in a real app, these would come from your API)
+        for (let i = 0; i < 3; i++) {
+          const videoItem = document.createElement('div');
+          videoItem.className = 'kling-video-item';
+          
+          // Create a video element with simulated animation
+          const video = document.createElement('video');
+          video.controls = true;
+          video.style.width = '100%';
+          
+          // Create a blob URL for our generated video
+          const blob = generateVideoFromImage(img, length, i);
+          const videoUrl = URL.createObjectURL(blob);
+          
+          videoItem.innerHTML = `
+            <video controls>
+              <source src="${videoUrl}" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+            <div class="kling-video-actions">
+              <span>Version ${i+1}</span>
+              <button class="kling-download-btn" data-video="${videoUrl}">Download</button>
+            </div>
+          `;
+          
+          videoGrid.appendChild(videoItem);
+        }
+        
+        resultsSection.scrollIntoView({ behavior: 'smooth' });
+      }, 2000);
+    };
   });
   
-  // Handle download buttons (delegated event since buttons are dynamically added)
-  document.addEventListener('click', function(e) {
+  // Function to generate a simulated video from the image
+  function generateVideoFromImage(img, duration, version) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    
+    // Create a stream to write our video frames to
+    const stream = canvas.captureStream(30);
+    const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+    const chunks = [];
+    
+    mediaRecorder.ondataavailable = function(e) {
+      chunks.push(e.data);
+    };
+    
+    mediaRecorder.start();
+    
+    // Record for the specified duration (in seconds)
+    const startTime = Date.now();
+    const endTime = startTime + (duration * 1000);
+    
+    // Create different animation effects based on version number
+    function drawFrame() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      
+      const currentTime = Date.now();
+      const progress = (currentTime - startTime) / (endTime - startTime);
+      
+      // Apply different effects based on version
+      if (version === 0) {
+        // Zoom in effect
+        const zoom = 1 + (progress * 0.5);
+        ctx.setTransform(zoom, 0, 0, zoom, 
+                        canvas.width/2 * (1 - zoom), 
+                        canvas.height/2 * (1 - zoom));
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+      } 
+      else if (version === 1) {
+        // Pan left effect
+        const offset = progress * canvas.width * 0.5;
+        ctx.drawImage(img, -offset, 0, canvas.width, canvas.height);
+      } 
+      else {
+        // Color fade effect
+        ctx.globalAlpha = 1 - (progress * 0.5);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        ctx.globalAlpha = 1.0;
+      }
+      
+      if (currentTime < endTime) {
+        requestAnimationFrame(drawFrame);
+      } else {
+        mediaRecorder.stop();
+      }
+    }
+    
+    drawFrame();
+    
+    // Return a promise that resolves with the video blob
+    return new Promise(resolve => {
+      mediaRecorder.onstop = function() {
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        resolve(blob);
+      };
+    });
+  }
+  
+  // Handle download buttons
+  document.addEventListener('click', async function(e) {
     if (e.target.classList.contains('kling-download-btn')) {
-      alert('Download functionality would be implemented here.');
-      // In a real implementation, you would trigger the download of the video
+      const videoUrl = e.target.dataset.video;
+      
+      // In our case, we need to generate the video when downloading
+      // since we're not storing it permanently
+      const videoItem = e.target.closest('.kling-video-item');
+      const video = videoItem.querySelector('video');
+      const duration = videoLength.value;
+      
+      // Show loading for download
+      e.target.textContent = 'Preparing...';
+      e.target.disabled = true;
+      
+      // Get the image
+      const img = new Image();
+      img.src = imagePreview.src;
+      
+      await img.decode();
+      
+      // Generate the video
+      const version = parseInt(videoItem.querySelector('span').textContent.replace('Version ', '')) - 1;
+      const blob = await generateVideoFromImage(img, duration, version);
+      const url = URL.createObjectURL(blob);
+      
+      // Create download link
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `generated-video-${new Date().getTime()}.mp4`;
+      document.body.appendChild(a);
+      a.click();
+      
+      // Clean up
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+      
+      e.target.textContent = 'Download';
+      e.target.disabled = false;
     }
   });
 });
